@@ -32,7 +32,7 @@ app = Flask(__name__)
 #################################################
 # Flask Routes
 #################################################
-last_date = '2016-08-23'
+
 @app.route("/")
 def Home_Page():
     """List all available api routes."""
@@ -41,8 +41,7 @@ def Home_Page():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/start<br/>"
-        f"/api/v1.0/start/end<br/>"
+        f"/api/v1.0/start/end"
     )
 
 
@@ -70,14 +69,31 @@ def temp_list():
     return jsonify(all_temp)
 
 
-@app.route("/api/v1.0/start/end")
-def start_date_list(start_date,end_date):
-    date_results = session.query(func.min(Measurement.tobs),func.avg(Measurement.tobs),func.max(Measurement.tobs)).\
-    filter(Measurement.date >= start_date).\
-    filter(Measurement.date <= end_date).all()
 
-    all_date = list(np.ravel(date_results))
-    return jsonify(all_date)
+@app.route("/api/v1.0/<start>")
+@app.route("/api/v1.0/<start>/<end>")
+def start_date_result(start=None, end=None):
+
+    sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
+    if not end:
+        start_results = session.query(*sel).\
+        filter(Measurement.date >= start).all()
+        
+        start_all_date = list(np.ravel(start_results))
+        return jsonify(start_all_date)
+
+    
+    
+    
+    end_results = session.query(*sel).\
+    filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+
+    end_dates = list(np.ravel(end_results))
+    return jsonify(end_dates)
+    
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
