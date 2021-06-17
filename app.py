@@ -1,6 +1,6 @@
 
+import datetime as dt
 import numpy as np
-
 
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, func
 
 from flask import Flask, jsonify
 
-engine = create_engine("sqlite:///Resources/hawaii.sqlite")
+engine = create_engine("sqlite:///Resources/hawaii.sqlite?check_same_thread=False")
 
 # reflect an existing database into a new model
 Base = automap_base()
@@ -27,6 +27,7 @@ session = Session(engine)
 # Flask Setup
 #################################################
 app = Flask(__name__)
+
 
 
 #################################################
@@ -82,8 +83,6 @@ def start_date_result(start=None, end=None):
         start_all_date = list(np.ravel(start_results))
         return jsonify(start_all_date)
 
-    
-    
     
     end_results = session.query(*sel).\
     filter(Measurement.date >= start).filter(Measurement.date <= end).all()
